@@ -1,6 +1,6 @@
 const htmlmin = require("html-minifier");
 
-module.exports = eleventyConfig => {
+module.exports = (eleventyConfig) => {
   // Add a readable date formatter filter to Nunjucks
   eleventyConfig.addFilter("dateDisplay", require("./filters/dates.js"));
 
@@ -10,12 +10,12 @@ module.exports = eleventyConfig => {
     require("./filters/timestamp.js")
   );
 
-  eleventyConfig.addFilter("markdownify", markdownString => {
+  eleventyConfig.addFilter("markdownify", (markdownString) => {
     const MarkdownIt = require("markdown-it");
     const md = new MarkdownIt({
       html: true,
       linkify: true,
-      typographer: true
+      typographer: true,
     });
 
     return md.render(markdownString);
@@ -27,7 +27,7 @@ module.exports = eleventyConfig => {
       let minified = htmlmin.minify(content, {
         useShortDoctype: true,
         removeComments: true,
-        collapseWhitespace: true
+        collapseWhitespace: true,
       });
       return minified;
     }
@@ -36,7 +36,7 @@ module.exports = eleventyConfig => {
 
   // Collections
 
-  eleventyConfig.addCollection("posts", collection => {
+  eleventyConfig.addCollection("posts", (collection) => {
     return collection.getFilteredByTag("post").reverse();
   });
 
@@ -49,7 +49,6 @@ module.exports = eleventyConfig => {
   eleventyConfig.addPassthroughCopy("images");
   eleventyConfig.addPassthroughCopy("webfonts");
 
-
   return {
     templateFormats: ["md", "njk"],
     markdownTemplateEngine: "njk",
@@ -60,7 +59,7 @@ module.exports = eleventyConfig => {
       input: "site",
       output: "dist",
       includes: "includes",
-      data: "data"
-    }
+      data: "data",
+    },
   };
 };

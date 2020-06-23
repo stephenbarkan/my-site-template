@@ -1,12 +1,5 @@
 //  General
-const {
-  gulp,
-  src,
-  dest,
-  watch,
-  series,
-  parallel
-} = require("gulp");
+const { gulp, src, dest, watch, series, parallel } = require("gulp");
 const rename = require("gulp-rename");
 const notify = require("gulp-notify");
 const plumber = require("gulp-plumber");
@@ -30,12 +23,12 @@ const uglify = require("gulp-uglify");
 const paths = {
   css: {
     source: "./site/css/main.scss",
-    dest: "./dist/css/"
+    dest: "./dist/css/",
   },
   javascript: {
-    source:"./site/js/*.js",
-    dest: "./dist/js/"
-  }
+    source: "./site/js/*.js",
+    dest: "./dist/js/",
+  },
 };
 
 /**
@@ -44,7 +37,7 @@ const paths = {
 var onError = function (err) {
   notify.onError({
     title: "Gulp Error - Compile Failed",
-    message: "Error: <%= error.message %>"
+    message: "Error: <%= error.message %>",
   })(err);
 
   this.emit("end");
@@ -62,23 +55,25 @@ class TailwindExtractor {
 /**
  * Compile SCSS & Tailwind
  */
-const compileCSS = done => {
+const compileCSS = (done) => {
   return src(paths.css.source)
-    .pipe(plumber({
-      errorHandler: onError
-    }))
+    .pipe(
+      plumber({
+        errorHandler: onError,
+      })
+    )
     .pipe(sass())
     .pipe(postcss([tailwindcss("./tailwind.config.js")]))
     .pipe(autoprefixer())
     .pipe(
       rename({
-        extname: ".css"
+        extname: ".css",
       })
     )
     .pipe(dest(paths.css.dest))
     .pipe(
       notify({
-        message: "Tailwind Compile Success"
+        message: "Tailwind Compile Success",
       })
     );
   done();
@@ -87,22 +82,24 @@ const compileCSS = done => {
 /**
  * Concatinate and compile scripts
  */
-const compileJS = done => {
+const compileJS = (done) => {
   return src(paths.javascript.source)
-    .pipe(plumber({
-      errorHandler: onError
-    }))
+    .pipe(
+      plumber({
+        errorHandler: onError,
+      })
+    )
     .pipe(
       babel({
         presets: ["@babel/env"],
-        sourceType: "script"
+        sourceType: "script",
       })
     )
     .pipe(concat("main.js"))
     .pipe(dest(paths.javascript.dest))
     .pipe(
       notify({
-        message: "Javascript Compile Success"
+        message: "Javascript Compile Success",
       })
     );
   done();
@@ -112,18 +109,18 @@ const compileJS = done => {
  * Minify scripts
  * This will be ran as part of our preflight task
  */
-const minifyJS = done => {
+const minifyJS = (done) => {
   return src(paths.javascript.dest + "main.js")
     .pipe(
       rename({
-        suffix: ".min"
+        suffix: ".min",
       })
     )
     .pipe(uglify())
     .pipe(dest(paths.javascript.dest))
     .pipe(
       notify({
-        message: "Javascript Minify Success"
+        message: "Javascript Minify Success",
       })
     );
   done();
@@ -132,7 +129,7 @@ const minifyJS = done => {
 /**
  * Watch files
  */
-const watchFiles = done => {
+const watchFiles = (done) => {
   watch(["site/*.njk", "site/includes/**/*.njk"], series(compileCSS));
   watch("./tailwind.config.js", series(compileCSS));
   watch("./site/css/**/*.scss", series(compileCSS));
@@ -145,18 +142,24 @@ const watchFiles = done => {
  *
  * Compile SCSS & Tailwind [PREFLIGHT]
  */
-const compileCSSPreflight = done => {
+const compileCSSPreflight = (done) => {
   return src(paths.css.source)
     .pipe(sass())
     .pipe(
       postcss([
         tailwindcss("./tailwind.config.js"),
         purgecss({
-          content: ["site/*.njk", "site/includes/**/*.njk", "site/css/**/*.scss"],
-          extractors: [{
-            extractor: TailwindExtractor,
-            extensions: ["html", "njk", "scss"]
-          }],
+          content: [
+            "site/*.njk",
+            "site/includes/**/*.njk",
+            "site/css/**/*.scss",
+          ],
+          extractors: [
+            {
+              extractor: TailwindExtractor,
+              extensions: ["html", "njk", "scss"],
+            },
+          ],
           /**
            * You can whitelist selectors to stop purgecss from removing them from your CSS.
            * see: https://www.purgecss.com/whitelisting
@@ -174,20 +177,20 @@ const compileCSSPreflight = done => {
             "h3",
             "p",
             "blockquote",
-            "intro"
-          ]
-        })
+            "intro",
+          ],
+        }),
       ])
     )
     .pipe(
       rename({
-        extname: ".css"
+        extname: ".css",
       })
     )
     .pipe(dest("css/"))
     .pipe(
       notify({
-        message: "CSS & Tailwind [PREFLIGHT] Success"
+        message: "CSS & Tailwind [PREFLIGHT] Success",
       })
     );
 };
@@ -195,18 +198,18 @@ const compileCSSPreflight = done => {
 /**
  * Minify CSS [PREFLIGHT]
  */
-const minifyCSSPreflight = done => {
+const minifyCSSPreflight = (done) => {
   return src(["./css/*.css", "!./css/*.min.css"])
     .pipe(cleanCSS())
     .pipe(
       rename({
-        suffix: ".min"
+        suffix: ".min",
       })
     )
     .pipe(dest("./css"))
     .pipe(
       notify({
-        message: "Minify CSS [PREFLIGHT] Success"
+        message: "Minify CSS [PREFLIGHT] Success",
       })
     );
 };
